@@ -386,6 +386,7 @@ class ZooCalrissianRunner:
             namespace=namespace,
             storage_class=self.storage_class,
             volume_size=self.get_volume_size(),
+            service_account=self.zoo_conf.conf.get("eodhp", {}).get("serviceAccountName", "default"),
             image_pull_secrets=secret_config,
         )
         session.initialise()
