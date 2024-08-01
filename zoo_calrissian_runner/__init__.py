@@ -229,7 +229,7 @@ class ZooInputs:
                     case "integer":
                         res[key]=int(value["value"])
                     case "boolean":
-                        res[key]=int(value["value"])
+                        res[key]=bool(value["value"])
                     case _:
                         res[key]=value["value"]
             else:
