@@ -220,7 +220,21 @@ class ZooInputs:
 
     def get_processing_parameters(self):
         """Returns a list with the input parameters keys"""
-        return {key: value["value"] for key, value in self.inputs.items()}
+        res={}
+        for key, value in self.inputs.items():
+            if "dataType" in value:
+                match value["dataType"]:
+                    case w if w in ["double","float"]:
+                        res[key]=float(value["value"])
+                    case "integer":
+                        res[key]=int(value["value"])
+                    case "boolean":
+                        res[key]=bool(value["value"])
+                    case _:
+                        res[key]=value["value"]
+            else:
+                res[key]=value["value"]
+        return res 
 
 
 class ZooOutputs:
