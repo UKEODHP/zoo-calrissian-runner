@@ -1,5 +1,6 @@
 import inspect
 import os
+import sys
 import uuid
 from datetime import datetime
 from typing import Union
@@ -12,6 +13,7 @@ from loguru import logger
 from pycalrissian.context import CalrissianContext
 from pycalrissian.execution import CalrissianExecution
 from pycalrissian.job import CalrissianJob
+from pycalrissian.utils import copy_to_volume
 
 from zoo_calrissian_runner.handlers import ExecutionHandler
 
@@ -221,19 +223,38 @@ class ZooInputs:
     def get_processing_parameters(self):
         """Returns a list with the input parameters keys"""
         res={}
+        hasVal=False;
         for key, value in self.inputs.items():
             if "dataType" in value:
-                match value["dataType"]:
-                    case w if w in ["double","float"]:
+                if isinstance(value["dataType"],list):
+                    # How should we pass array for an input?
+                    import json
+                    res[key]=value["value"]
+                else:
+                    if value["dataType"] in ["double","float"]:
                         res[key]=float(value["value"])
-                    case "integer":
+                    elif value["dataType"] == "integer":
                         res[key]=int(value["value"])
-                    case "boolean":
-                        res[key]=bool(value["value"])
-                    case _:
+                    elif value["dataType"] == "boolean":
+                        res[key]=int(value["value"])
+                    else:
                         res[key]=value["value"]
             else:
-                res[key]=value["value"]
+                if "cache_file" in value:
+                    if "mimeType" in value:
+                        res[key]={
+                            "class": "File",
+                            "path": value["cache_file"],
+                            "format": value["mimeType"]
+                        }
+                    else:
+                        res[key]={
+                            "class": "File",
+                            "path": value["cache_file"],
+                            "format": "text/plain"
+                        }
+                else:
+                    res[key]=value["value"]
         return res 
 
 
@@ -412,6 +433,32 @@ class ZooCalrissianRunner:
             **self.handler.get_additional_parameters(),
         }
 
+
+        self.update_status(progress=20, message="upload required files")
+
+
+        # Upload input complex data into calrissian_wdir
+        for i in processing_parameters:
+            if isinstance(processing_parameters[i],dict):
+                if processing_parameters[i]["class"]=="File":
+                    copy_to_volume(
+                        context=session,
+                        volume={
+                            "name": session.calrissian_wdir,
+                            "persistentVolumeClaim": {
+                                "claimName": session.calrissian_wdir
+                            }
+                        },
+                        volume_mount={
+                            "name": session.calrissian_wdir,
+                            "mountPath": "/calrissian",
+                        },
+                        source_paths=[
+                            processing_parameters[i]["path"]
+                        ],
+                        destination_path="/calrissian",
+                    )
+                    processing_parameters[i]["path"]=processing_parameters[i]["path"].replace(self.zoo_conf.conf["main"]["tmpPath"],"/calrissian")
         # checks if all parameters where provided
 
         logger.info("create Calrissian job")
@@ -429,18 +476,18 @@ class ZooCalrissianRunner:
             tool_logs=True,
         )
 
-        self.update_status(progress=20, message="execution submitted")
+        self.update_status(progress=23, message="execution submitted")
 
         logger.info("execution")
-        execution = CalrissianExecution(job=job, runtime_context=session)
-        execution.submit()
+        self.execution = CalrissianExecution(job=job, runtime_context=session)
+        self.execution.submit()
 
-        execution.monitor(interval=self.monitor_interval)
+        self.execution.monitor(interval=self.monitor_interval)
 
-        if execution.is_complete():
+        if self.execution.is_complete():
             logger.info("execution complete")
 
-        if execution.is_succeeded():
+        if self.execution.is_succeeded():
             exit_value = zoo.SERVICE_SUCCEEDED
         else:
             exit_value = zoo.SERVICE_FAILED
@@ -448,10 +495,10 @@ class ZooCalrissianRunner:
         self.update_status(progress=90, message="delivering outputs, logs and usage report")
 
         logger.info("handle outputs execution logs")
-        output = execution.get_output()
-        log = execution.get_log()
-        usage_report = execution.get_usage_report()
-        tool_logs = execution.get_tool_logs()
+        output = self.execution.get_output()
+        log = self.execution.get_log()
+        usage_report = self.execution.get_usage_report()
+        tool_logs = self.execution.get_tool_logs()
 
         self.outputs.set_output(output)
 
