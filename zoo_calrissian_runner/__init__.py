@@ -223,7 +223,7 @@ class ZooInputs:
     def get_processing_parameters(self):
         """Returns a list with the input parameters keys"""
         res={}
-        hasVal=False;
+        hasVal=False
         for key, value in self.inputs.items():
             if "dataType" in value:
                 if isinstance(value["dataType"],list):
@@ -236,7 +236,7 @@ class ZooInputs:
                     elif value["dataType"] == "integer":
                         res[key]=int(value["value"])
                     elif value["dataType"] == "boolean":
-                        res[key]=int(value["value"])
+                        res[key]=bool(value["value"])
                     else:
                         res[key]=value["value"]
             else:
