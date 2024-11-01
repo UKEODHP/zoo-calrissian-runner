@@ -1,6 +1,5 @@
 import inspect
 import os
-import sys
 import uuid
 from datetime import datetime
 from typing import Union
@@ -223,22 +222,21 @@ class ZooInputs:
     def get_processing_parameters(self):
         """Returns a list with the input parameters keys"""
         res={}
-        hasVal=False
         for key, value in self.inputs.items():
             if "dataType" in value:
                 if isinstance(value["dataType"],list):
                     # How should we pass array for an input?
-                    import json
                     res[key]=value["value"]
                 else:
-                    if value["dataType"] in ["double","float"]:
-                        res[key]=float(value["value"])
-                    elif value["dataType"] == "integer":
-                        res[key]=int(value["value"])
-                    elif value["dataType"] == "boolean":
-                        res[key]=bool(value["value"])
-                    else:
-                        res[key]=value["value"]
+                    match value["dataType"]:
+                        case ("double" | "float"):
+                            res[key]=float(value["value"])
+                        case "integer":
+                            res[key]=int(value["value"])
+                        case "boolean":
+                            res[key]=bool(value["value"])
+                        case _:
+                            res[key]=value["value"]
             else:
                 if "cache_file" in value:
                     if "mimeType" in value:
