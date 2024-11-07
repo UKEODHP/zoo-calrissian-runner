@@ -228,15 +228,14 @@ class ZooInputs:
                     # How should we pass array for an input?
                     res[key]=value["value"]
                 else:
-                    match value["dataType"]:
-                        case ("double" | "float"):
-                            res[key]=float(value["value"])
-                        case "integer":
-                            res[key]=int(value["value"])
-                        case "boolean":
-                            res[key]=bool(value["value"])
-                        case _:
-                            res[key]=value["value"]
+                    if value["dataType"] in ["double","float"]:
+                        res[key]=float(value["value"])
+                    elif value["dataType"] == "integer":
+                        res[key]=int(value["value"])
+                    elif value["dataType"] == "boolean":
+                        res[key]=bool(value["value"])
+                    else:
+                        res[key]=value["value"]
             else:
                 if "cache_file" in value:
                     if "mimeType" in value:
