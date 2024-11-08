@@ -289,6 +289,7 @@ class ZooCalrissianRunner:
         self.inputs = ZooInputs(inputs)
         self.outputs = ZooOutputs(outputs)
         self.cwl = Workflow(cwl, self.zoo_conf.workflow_id)
+        self.token = inputs["user_token"]["value"]
 
         self.handler = execution_handler
 
@@ -471,6 +472,7 @@ class ZooCalrissianRunner:
             debug=True,
             no_read_only=True,
             tool_logs=True,
+            token = self.token
         )
 
         self.update_status(progress=23, message="execution submitted")
