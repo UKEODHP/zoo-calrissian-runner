@@ -290,7 +290,7 @@ class ZooCalrissianRunner:
         self.outputs = ZooOutputs(outputs)
         self.cwl = Workflow(cwl, self.zoo_conf.workflow_id)
         self.token = inputs["user_token"]["value"]
-        self.calling_namespace = inputs["calling_namespace"]["value"]
+        self.calling_workspace = inputs["calling_workspace"]["value"]
 
         self.handler = execution_handler
 
@@ -422,7 +422,7 @@ class ZooCalrissianRunner:
             volume_size=self.get_volume_size(),
             service_account=self.zoo_conf.conf.get("eodhp", {}).get("serviceAccountName", "default"),
             image_pull_secrets=secret_config,
-            calling_namespace=self.calling_namespace,
+            calling_workspace=self.calling_workspace,
         )
         session.initialise()
         self.update_status(progress=15, message="processing environment created, preparing execution")
@@ -475,7 +475,7 @@ class ZooCalrissianRunner:
             no_read_only=True,
             tool_logs=True,
             token = self.token,
-            calling_namespace=self.calling_namespace,
+            calling_workspace=self.calling_workspace,
         )
 
         self.update_status(progress=23, message="execution submitted")
