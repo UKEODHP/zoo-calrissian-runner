@@ -292,6 +292,7 @@ class ZooCalrissianRunner:
         self.token = inputs["user_token"]["value"]
         self.calling_workspace = inputs["calling_workspace"]["value"]
         self.executing_workspace = inputs["executing_workspace"]["value"]
+        self.job_id = conf["lenv"]["usid"]
 
         self.handler = execution_handler
 
@@ -425,6 +426,7 @@ class ZooCalrissianRunner:
             image_pull_secrets=secret_config,
             calling_workspace=self.calling_workspace,
             executing_workspace=self.executing_workspace,
+            job_id=self.job_id,
         )
         session.initialise()
         self.update_status(progress=15, message="processing environment created, preparing execution")
@@ -479,6 +481,7 @@ class ZooCalrissianRunner:
             token = self.token,
             calling_workspace=self.calling_workspace,
             executing_workspace=self.executing_workspace,
+            job_id=self.job_id,
         )
 
         self.update_status(progress=23, message="execution submitted")
