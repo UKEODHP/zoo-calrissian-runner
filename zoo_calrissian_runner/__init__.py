@@ -289,6 +289,10 @@ class ZooCalrissianRunner:
         self.inputs = ZooInputs(inputs)
         self.outputs = ZooOutputs(outputs)
         self.cwl = Workflow(cwl, self.zoo_conf.workflow_id)
+        self.token = inputs["user_token"]["value"]
+        self.calling_workspace = inputs["calling_workspace"]["value"]
+        self.executing_workspace = inputs["executing_workspace"]["value"]
+        self.job_id = conf["lenv"]["usid"]
 
         self.handler = execution_handler
 
@@ -420,6 +424,9 @@ class ZooCalrissianRunner:
             volume_size=self.get_volume_size(),
             service_account=self.zoo_conf.conf.get("eodhp", {}).get("serviceAccountName", "default"),
             image_pull_secrets=secret_config,
+            calling_workspace=self.calling_workspace,
+            executing_workspace=self.executing_workspace,
+            job_id=self.job_id,
         )
         session.initialise()
         self.update_status(progress=15, message="processing environment created, preparing execution")
@@ -471,6 +478,10 @@ class ZooCalrissianRunner:
             debug=True,
             no_read_only=True,
             tool_logs=True,
+            token = self.token,
+            calling_workspace=self.calling_workspace,
+            executing_workspace=self.executing_workspace,
+            job_id=self.job_id,
         )
 
         self.update_status(progress=23, message="execution submitted")
