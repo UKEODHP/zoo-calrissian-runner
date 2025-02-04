@@ -222,8 +222,6 @@ class ZooInputs:
     def get_processing_parameters(self):
         """Returns a list with the input parameters keys"""
         res={}
-        print("Inputs are")
-        print(self.inputs)
         for key, value in self.inputs.items():
             if "dataType" in value:
                 if isinstance(value["dataType"],list):
@@ -253,7 +251,6 @@ class ZooInputs:
                             "format": "text/plain"
                         }
                 else:
-                    print(key)
                     res[key]=value["value"]
         return res 
 
