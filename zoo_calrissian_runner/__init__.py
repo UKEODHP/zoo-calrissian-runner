@@ -289,7 +289,6 @@ class ZooCalrissianRunner:
         self.inputs = ZooInputs(inputs)
         self.outputs = ZooOutputs(outputs)
         self.cwl = Workflow(cwl, self.zoo_conf.workflow_id)
-        self.token = inputs["user_token"]["value"]
         self.calling_workspace = inputs["calling_workspace"]["value"]
         self.executing_workspace = inputs["executing_workspace"]["value"]
         self.job_id = conf["lenv"]["usid"]
@@ -478,7 +477,6 @@ class ZooCalrissianRunner:
             debug=True,
             no_read_only=True,
             tool_logs=True,
-            token = self.token,
             calling_workspace=self.calling_workspace,
             executing_workspace=self.executing_workspace,
             job_id=self.job_id,
