@@ -1,5 +1,6 @@
 import inspect
 import os
+import sys
 import uuid
 from datetime import datetime
 from typing import Union
@@ -421,11 +422,13 @@ class ZooCalrissianRunner:
             namespace=namespace,
             storage_class=self.storage_class,
             volume_size=self.get_volume_size(),
-            service_account=self.zoo_conf.conf.get("eodhp", {}).get("serviceAccountName", "default"),
             image_pull_secrets=secret_config,
             calling_workspace=self.calling_workspace,
             executing_workspace=self.executing_workspace,
             job_id=self.job_id,
+            calling_service_account=self.zoo_conf.conf.get("eodhp", {}).get(
+                "serviceAccountNameCalling", "default" 
+            ),
         )
         session.initialise()
         self.update_status(progress=15, message="processing environment created, preparing execution")
